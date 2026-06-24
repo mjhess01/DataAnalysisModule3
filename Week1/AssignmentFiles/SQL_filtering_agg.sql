@@ -78,6 +78,11 @@ having orders_count >= 2;
 
 -- Q10) Per store, list payment_method and the number of PAID orders.
 --      Return (store_id, payment_method, paid_orders_count).
+select store_id, payment_method, count(order_id) as paid_orders_count
+from orders
+where status = 'paid'
+group by store_id, payment_method
+order by store_id;
 
 -- Q11) Among PAID orders, what percent used 'app' as the payment_method?
 --      Return a single row with pct_app_paid_orders (0–100).
