@@ -1,0 +1,9 @@
+{
+    "editor.hover.above": false,
+    "editor.hover.enabled": "off",
+    "editor.hover.delay": 0,
+    "editor.hover.hidingDelay": 0,
+    "editor.hover.sticky": false,
+    "workbench.sash.hoverDelay": 0,
+    "js/ts.hover.maximumLength": 10
+}
