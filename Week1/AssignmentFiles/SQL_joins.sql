@@ -47,6 +47,20 @@ and o.order_id = null;
 --     Return store_name, product_name, total_units.
 --     Hint: Use a window function (ROW_NUMBER PARTITION BY store) or a correlated subquery.
 
+with cte as (
+	select
+		o.store_id,
+        oi.product_id,
+        oi.quantity as total_units,
+        row_number() over ( partition by o.store_id order by oi.quantity desc) as row_num
+	from orders o
+    join order_items oi on o.order_id = oi.order_id
+)
+
+select *
+from cte
+where row_num = 1
+
 -- Q6) Inventory check: show rows where on_hand < 12 in any store.
 --     Return store_name, product_name, on_hand.
 select s.name, p.name, i.on_hand
@@ -60,14 +74,37 @@ where on_hand < 12;
 select concat(e.first_name, e.last_name) as manager_name, e.hire_date
 from employees e
 join stores s on s.store_id = e.store_id
-where title = 'Manager'
+where title = 'Manager';
 
 -- Q8) Using a subquery/CTE: list products whose total PAID revenue is above
 --     the average PAID product revenue. Return product_name, total_revenue.
+with total_revenue as (
+	select p.name, sum(oi.quantity * p.price) as total
+    from order_items oi
+    join products p
+    on oi.product_id = p.product_id
+    group by p.name
+),
+avg_revenue as (
+	select avg(total) as average
+	from total_revenue
+)
+
+select tr.name, tr.total
+from total_revenue tr
+cross join avg_revenue ar
+where tr.total > ar.average;
 
 -- Q9) Churn-ish check: list customers with their last PAID order date.
 --     If they have no PAID orders, show NULL.
 --     Hint: Put the status filter in the LEFT JOIN's ON clause to preserve non-buyer rows.
+
+select
+	concat(c.first_name, c.last_name) as customer_name,
+    max(o.order_datetime)
+from customers c
+left join orders o on c.customer_id = o.customer_id and o.status = 'paid'
+group by c.customer_id
 
 -- Q10) Product mix report (PAID only):
 --     For each store and category, show total units and total revenue (= SUM(quantity * products.price)).
